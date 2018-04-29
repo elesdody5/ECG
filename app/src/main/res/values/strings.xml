@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">ECG</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="start_connection">Connect</string>
+    <string name="open_bluetooth">Open Bluetooth</string>
+    <string name="scan">Scan Devices</string>
+    <string name="devices_found">Devices Found:</string>
+</resources>
