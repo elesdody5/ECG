@@ -1,43 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     tools:context="com.example.android.ecg.MainActivity"
-    android:orientation="vertical"
+
+
     >
 
-
-    <com.jjoe64.graphview.GraphView
-        android:id="@+id/graph2"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:layout_weight="5"
-        />
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:orientation="horizontal">
-        <TextView
+        android:layout_height="match_parent"
+        android:layout_marginLeft="@dimen/marginLeft">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                android:theme="@style/ThemeOverlay.AppCompat.ActionBar" />
+
+            <com.jjoe64.graphview.GraphView
+                android:id="@+id/graph2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+
+                />
+
+
+            <Switch
+                android:id="@+id/connect_switch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:text="@string/start_connection" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:text="@string/information"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="start">
+
+        <!-- Container for contents of drawer - use NavigationView to make configuration easier -->
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/devices_found"/>
-    <ListView
-        android:id="@+id/list_device_view"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:layout_marginTop="30dp"/>
-        <Switch
-            android:id="@+id/connect_switch"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/start_connection"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:menu="@menu/bluetooth_settings"
+            app:headerLayout="@layout/navigation_view_header">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/listview_margin_top"
+                android:orientation="vertical"
+                android:layout_marginLeft="@dimen/marginLeft">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/devices_found"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Body2"/>
+
+                <ListView
+                    android:id="@+id/list_device_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:fitsSystemWindows="true" />
+            </LinearLayout>
+
             />
-    </LinearLayout>
+        </android.support.design.widget.NavigationView>
+    </FrameLayout>
 
-
-</LinearLayout>
+</android.support.v4.widget.DrawerLayout>

@@ -6,4 +6,6 @@
     <string name="open_bluetooth">Open Bluetooth</string>
     <string name="scan">Scan Devices</string>
     <string name="devices_found">Devices Found:</string>
+    <string name="information"> Information: </string>
+    <string name="bluetooth_setting">Bluetooth Setting </string>
 </resources>

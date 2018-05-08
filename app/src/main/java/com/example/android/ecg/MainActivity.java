@@ -1,7 +1,5 @@
 package com.example.android.ecg;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -10,19 +8,20 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Handler;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.ListView;
-import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -32,7 +31,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
@@ -40,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private static double incomingData =0.0;
     BluetoothAdapter mBluetoothAdapter;
     private MenuItem menuItem;
+    Switch connect;
     private final Handler mHandler = new Handler();
     private Runnable mTimer2;
     private LineGraphSeries<DataPoint> mSeries2;
@@ -47,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private ArrayList<BluetoothDevice> DevicesList;
     private ListView listDeviceView;
     listDevicesAdapter adapter;
+    private DrawerLayout mDrawerLayout;
     private BluetoothConnectionService mBluetoothConnectionService;
     private static final UUID MY_UUID_INSECURE =
             UUID.fromString("8ce255c0-200a-11e0-ac64-0800200c9a66");
@@ -61,12 +61,46 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+       setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        GraphView graph2 = (GraphView) findViewById(R.id.graph2);
+       GraphView graph2 = (GraphView) findViewById(R.id.graph2);
         listDeviceView =  findViewById(R.id.list_device_view);
         DevicesList = new ArrayList<>();
-        Switch connect = findViewById(R.id.connect_switch);
+        connect = findViewById(R.id.connect_switch);
+        mDrawerLayout =findViewById(R.id.drawer_layout);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        // set item as selected to persist highlight
+                        menuItem = item;
+
+
+
+                        int id = item.getItemId();
+                        switch (id) {
+                            case R.id.on_off_button:
+                                changeBluetooth();
+                                break;
+                            case R.id.scan_button:
+                                scanDevices();
+                                break;
+
+
+                        }
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+
+                        return true;
+                    }
+                });
         mSeries2 = new LineGraphSeries<>();
         graph2.addSeries(mSeries2);
         graph2.getViewport().setXAxisBoundsManual(true);
@@ -77,11 +111,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         graph2.getViewport().setMaxY(100);*/
         //Broadcast when bound state change (pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        listDeviceView.setOnItemClickListener(this);
+     listDeviceView.setOnItemClickListener(this);
         registerReceiver(mReceiver, filter);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-        connect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+     connect.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked)
@@ -92,8 +126,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private void startBTConnection(BluetoothDevice device, UUID uuid) {
         Log.d(Tag, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-  if (device==null)
-    Toast.makeText(this,"Choose device ",Toast.LENGTH_SHORT).show();
+  if (device==null) {
+      Toast.makeText(this, "Choose device ", Toast.LENGTH_SHORT).show();
+      connect.setChecked(false);
+  }
   else {
       mBluetoothConnectionService.startClient(device, uuid);
   }
@@ -109,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void run() {
                 graph2LastXValue += 1d;
-                mSeries2.appendData(new DataPoint(graph2LastXValue, getRandom()), true, 40);
+                mSeries2.appendData(new DataPoint(graph2LastXValue, getBluetoothData()), true, 40);
                 mHandler.postDelayed(this, 200);
             }
         };
@@ -123,23 +159,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         super.onPause();
     }
 
-    private DataPoint[] generateData() {
-        int count = 30;
-        DataPoint[] values = new DataPoint[count];
-        for (int i = 0; i < count; i++) {
-            double x = i;
-            double f = mRand.nextDouble() * 0.15 + 0.3;
-            double y = Math.sin(i * f + 2) + mRand.nextDouble() * 0.3;
-            DataPoint v = new DataPoint(x, y);
-            values[i] = v;
-        }
-        return values;
-    }
 
-    double mLastRandom = 2;
-    Random mRand = new Random();
 
-    private double getRandom() {
+
+
+    private double getBluetoothData() {
 
         if(mBluetoothConnectionService!=null)
 
@@ -156,12 +180,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.bluetooth_settings, menu);
-        return true;
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
-    @Override
+
+   /* @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         menuItem = item;
         int id = item.getItemId();
@@ -179,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         return super.onOptionsItemSelected(item);
     }
-
+*/
     private void changeBluetooth() {
 
         if (menuItem.isChecked()) {
@@ -266,6 +296,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         String name = DevicesList.get(i).getName();
         String  address = DevicesList.get(i).getAddress();
         Log.d(Tag,"name "+name + "address"+address);
+
         // to check version must greater than jelly bean (not important her)
         if(Build.VERSION.SDK_INT>Build.VERSION_CODES.JELLY_BEAN_MR2)
         {

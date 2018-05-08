@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="marginLeft">10dp</dimen>
+    <dimen name="listview_margin_top">300dp</dimen>
+
+</resources>
